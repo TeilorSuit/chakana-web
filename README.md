@@ -8,7 +8,7 @@ Página web oficial del videojuego **CHAKANA**, desarrollada para la **Feria de 
 
 ## Vista previa
 
-🔗 **[eduaardok.github.io/chakana-web](https://eduaardok.github.io/chakana-web)**
+🔗 **[teilorsuit.github.io/chakana-web](https://teilorsuit.github.io/chakana-web/)**
 
 ---
 
