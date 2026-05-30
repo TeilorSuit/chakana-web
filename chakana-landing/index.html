@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CHAKANA — Asciende por los Tres Mundos</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Phosphor Icons — light variant -->
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/light/style.css" />
+
+  <!-- GSAP + ScrollTrigger + MotionPath -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            cinzel: ['Cinzel', 'serif'],
+            cinzelDec: ['"Cinzel Decorative"', 'serif'],
+            crimson: ['"Crimson Text"', 'serif'],
+          },
+          colors: {
+            gold: {
+              300: '#f0d080',
+              400: '#e8c050',
+              500: '#d4a017',
+              600: '#b8860b',
+              700: '#8b6914',
+            },
+            earth: {
+              800: '#2a1a0e',
+              900: '#1a0f06',
+            },
+            chakana: {
+              dark: '#0d0a1a',
+              mid: '#1a1230',
+              light: '#2d1f4a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* ── Base ── */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { font-family: 'Crimson Text', serif; }
+
+    body {
+      background-color: #0d0a1a;
+      color: #e8d5a0;
+      overflow-x: hidden;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0d0a1a; }
+    ::-webkit-scrollbar-thumb { background: #d4a017; border-radius: 3px; }
+
+    /* ── Gold gradient text ── */
+    .text-gold-gradient {
+      background: linear-gradient(135deg, #f0d080 0%, #d4a017 40%, #f0d080 70%, #b8860b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Section divider ── */
+    .chakana-divider {
+      width: 120px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #d4a017, transparent);
+      margin: 0 auto;
+    }
+
+    /* ── Hero ── */
+    #hero {
+      position: relative;
+      height: 100dvh;
+      min-height: 600px;
+      background-image: url('backgroundSky.png');
+      background-size: cover;
+      background-position: center top;
+      background-attachment: fixed;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    #hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(13, 10, 26, 0.35) 0%,
+        rgba(13, 10, 26, 0.15) 40%,
+        rgba(13, 10, 26, 0.6) 85%,
+        rgba(13, 10, 26, 1) 100%
+      );
+      z-index: 1;
+    }
+
+    .hero-content { position: relative; z-index: 2; }
+
+    /* ── Particles canvas ── */
+    #particles-canvas {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* ── Floating rune ornament ── */
+    .hero-rune {
+      position: absolute;
+      z-index: 1;
+      opacity: 0.18;
+      pointer-events: none;
+      animation: floatRune 8s ease-in-out infinite;
+    }
+    @keyframes floatRune {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-18px) rotate(6deg); }
+    }
+
+    /* ── Chakana cross SVG spin ── */
+    .chakana-icon-spin {
+      animation: spinSlow 20s linear infinite;
+    }
+    @keyframes spinSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Characters section ── */
+    #characters {
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ── Carousel ── */
+    .carousel-wrapper {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .carousel-track {
+      display: flex;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+    }
+
+    .char-card {
+      flex: 0 0 100%;
+      min-width: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Card inner layout — 100svh fijo: 60% sprite / 40% texto */
+    .char-card-inner {
+      position: relative;
+      height: 100svh;
+      min-height: 520px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .char-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      transition: transform 0.8s ease;
+    }
+
+    .char-card:hover .char-bg {
+      transform: scale(1.04);
+    }
+
+    /* Zona sprite: 60% superior — contenida, jamás desborda */
+    .char-zone-sprite {
+      flex: 0 0 60%;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 2rem 2rem 0;
+      overflow: hidden;
+    }
+
+    /* Vignette superior sutil */
+    .char-zone-sprite::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 5rem;
+      background: linear-gradient(to bottom, rgba(13,10,26,0.55), transparent);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .char-sprite {
+      position: relative;
+      z-index: 1;
+      width: auto;
+      height: 100%;
+      max-width: 90%;
+      object-fit: contain;
+      object-position: bottom center;
+      filter: drop-shadow(0 0 40px rgba(212, 160, 23, 0.35));
+      transition: filter 0.4s ease;
+    }
+
+    .char-card:hover .char-sprite {
+      filter: drop-shadow(0 0 60px rgba(212, 160, 23, 0.6));
+    }
+
+    /* Zona texto: 40% inferior — gradiente oscuro, sprite nunca se superpone */
+    .char-zone-text {
+      flex: 0 0 40%;
+      position: relative;
+      z-index: 2;
+      background: linear-gradient(to top, rgba(0,0,0,0.92) 80%, transparent);
+      padding: 1rem 1.5rem 1.5rem;
+      overflow: hidden;
+    }
+
+    /* Carousel nav dots */
+    .carousel-dots button {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(212, 160, 23, 0.3);
+      border: 1px solid rgba(212, 160, 23, 0.5);
+      transition: all 0.3s;
+    }
+    .carousel-dots button.active {
+      background: #d4a017;
+      width: 24px;
+      border-radius: 4px;
+    }
+
+    /* Carousel arrow buttons */
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(212, 160, 23, 0.15);
+      border: 1px solid rgba(212, 160, 23, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.3s, border-color 0.3s;
+      backdrop-filter: blur(6px);
+    }
+    .carousel-btn:hover {
+      background: rgba(212, 160, 23, 0.35);
+      border-color: #d4a017;
+    }
+    .carousel-btn-prev { left: 12px; }
+    .carousel-btn-next { right: 12px; }
+
+    /* ── Challenges section ── */
+    #challenges {
+      background: linear-gradient(180deg, #0d0a1a 0%, #1a1230 50%, #0d0a1a 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .challenge-card {
+      background: linear-gradient(135deg, rgba(45, 31, 74, 0.6), rgba(26, 18, 48, 0.8));
+      border: 1px solid rgba(212, 160, 23, 0.25);
+      border-radius: 16px;
+      transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      transform: translateY(60px);
+    }
+
+    .challenge-card:hover {
+      border-color: rgba(212, 160, 23, 0.7);
+      transform: translateY(-6px) !important;
+      box-shadow: 0 20px 50px rgba(212, 160, 23, 0.15);
+    }
+
+    /* Tags de tipo de desafío */
+    .challenge-tag-text {
+      letter-spacing: 0.1em;
+    }
+
+    .challenge-icon {
+      font-size: 3rem;
+      line-height: 1;
+      filter: drop-shadow(0 0 16px rgba(212, 160, 23, 0.5));
+    }
+
+    /* ── Footer section ── */
+    #footer-tech {
+      background: linear-gradient(180deg, #0d0a1a, #060410);
+      border-top: 1px solid rgba(212, 160, 23, 0.2);
+    }
+
+    .tech-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(212, 160, 23, 0.1);
+      border: 1px solid rgba(212, 160, 23, 0.3);
+      border-radius: 9999px;
+      padding: 0.4rem 1rem;
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      color: #f0d080;
+      letter-spacing: 0.08em;
+    }
+
+    /* ── World nav bar (sticky) ── */
+    #world-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.4s, backdrop-filter 0.4s;
+    }
+    #world-nav.scrolled {
+      background: rgba(13, 10, 26, 0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(212, 160, 23, 0.15);
+    }
+
+    .nav-link {
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(240, 208, 128, 0.75);
+      transition: color 0.3s;
+    }
+    .nav-link:hover { color: #f0d080; }
+
+    /* ── Scroll indicator ── */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      animation: bounceDown 2s ease-in-out infinite;
+    }
+    @keyframes bounceDown {
+      0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.6; }
+      50% { transform: translateX(-50%) translateY(10px); opacity: 1; }
+    }
+
+    /* ── Decorative horizontal lines ── */
+    .ornament-line {
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(212,160,23,0.6) 30%, rgba(212,160,23,0.9) 50%, rgba(212,160,23,0.6) 70%, transparent 100%);
+    }
+
+    /* ── Power badge in char card ── */
+    .power-tag {
+      display: inline-block;
+      background: rgba(212, 160, 23, 0.12);
+      border: 1px solid rgba(212, 160, 23, 0.4);
+      border-radius: 4px;
+      padding: 0.2rem 0.75rem;
+      font-size: 0.75rem;
+      font-family: 'Cinzel', serif;
+      letter-spacing: 0.06em;
+      color: #e8c050;
+    }
+
+    /* ── Responsive ── */
+    @media (min-width: 768px) {
+      .char-zone-text { padding: 1.25rem 2.5rem 2rem; }
+    }
+
+    @media (min-width: 1024px) {
+      #hero { background-attachment: fixed; }
+      .char-sprite { max-width: 55%; }
+      .challenges-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    /* ── Glow ring for logo ── */
+    .logo-glow {
+      filter: drop-shadow(0 0 30px rgba(212, 160, 23, 0.5)) drop-shadow(0 0 80px rgba(212, 160, 23, 0.2));
+    }
+
+    /* ── Stars parallax ── */
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: white;
+      animation: twinkle var(--d, 3s) ease-in-out infinite var(--delay, 0s);
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: var(--min-op, 0.2); transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.4); }
+    }
+
+    /* ── Section fade in ── */
+    .section-reveal {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     NAVIGATION
+════════════════════════════════════════ -->
+<nav id="world-nav" aria-label="Navegación principal">
+  <div class="flex items-center gap-2">
+    <img src="chakana_infiel1.png" alt="Chakana isotipo" class="h-8 w-8 object-contain opacity-90" />
+    <span class="font-cinzelDec text-gold-400 text-xs tracking-widest hidden sm:block">CHAKANA</span>
+  </div>
+  <div class="flex items-center gap-4 sm:gap-6">
+    <a href="#characters" class="nav-link">Personajes</a>
+    <a href="#challenges" class="nav-link">Desafíos</a>
+    <a href="#footer-tech" class="nav-link">Créditos</a>
+  </div>
+</nav>
+
+
+<!-- ════════════════════════════════════════
+     HERO
+════════════════════════════════════════ -->
+<section id="hero" aria-label="Hero principal">
+
+  <!-- Particle canvas -->
+  <canvas id="particles-canvas" aria-hidden="true"></canvas>
+
+  <!-- Decorative runes -->
+  <img src="chakana_infiel1.png" alt=""
+       class="hero-rune w-20 sm:w-28 top-24 left-6 sm:left-16"
+       style="animation-delay: 0s;"
+       aria-hidden="true" />
+  <img src="chakana_infiel1.png" alt=""
+       class="hero-rune w-12 sm:w-16 bottom-32 right-8 sm:right-20"
+       style="animation-delay: 3s; animation-duration: 11s;"
+       aria-hidden="true" />
+
+  <!-- Main content -->
+  <div class="hero-content text-center px-5 max-w-2xl mx-auto">
+
+    <!-- Logo -->
+    <div id="hero-logo" class="mb-6 sm:mb-8" style="opacity:0; transform: scale(0.7);">
+      <img src="chakanal1.png"
+           alt="Logo Chakana"
+           class="logo-glow mx-auto w-56 sm:w-72 md:w-80 lg:w-96 object-contain"
+           style="mix-blend-mode: screen;" />
+    </div>
+
+    <!-- Tagline -->
+    <div id="hero-tagline" style="opacity:0; transform: translateY(30px);">
+      <div class="ornament-line mb-5 mx-auto max-w-xs"></div>
+
+      <h1 class="font-cinzel text-2xl sm:text-3xl md:text-4xl text-gold-gradient leading-tight mb-3">
+        Asciende por los Tres Mundos.<br/>Restaura el Equilibrio.
+      </h1>
+
+      <p class="font-crimson text-base sm:text-lg text-amber-100/80 leading-relaxed mb-6 max-w-lg mx-auto">
+        La cosmovisión andina se ha fracturado. Guía a <em>Sami</em> a través del
+        Uku Pacha, Kay Pacha y Hanan Pacha, reúne los fragmentos de la Chakana
+        y enfrenta a <em>La Entidad</em> antes de que el desequilibrio consuma los tres mundos.
+      </p>
+
+      <div class="ornament-line mt-5 mx-auto max-w-xs"></div>
+
+      <!-- World pills -->
+      <div class="flex justify-center gap-3 mt-6 flex-wrap">
+        <span class="tech-badge"><i class="ph-light ph-moon-stars" style="font-size:1rem;"></i> Uku Pacha</span>
+        <span class="tech-badge"><i class="ph-light ph-mountains" style="font-size:1rem;"></i> Kay Pacha</span>
+        <span class="tech-badge"><i class="ph-light ph-sun" style="font-size:1rem;"></i> Hanan Pacha</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Scroll indicator -->
+  <div class="scroll-indicator" aria-hidden="true">
+    <span class="font-cinzel text-gold-400/60 text-xs tracking-widest">EXPLORAR</span>
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M10 3v14M4 11l6 6 6-6" stroke="#d4a017" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+</section>
+
+
+<!-- ════════════════════════════════════════
+     CHARACTERS CAROUSEL
+════════════════════════════════════════ -->
+<section id="characters" aria-label="Personajes del juego">
+
+  <!-- Section header -->
+  <div class="text-center pt-16 pb-8 px-5 section-reveal">
+    <p class="font-cinzel text-gold-500 text-xs tracking-[0.25em] uppercase mb-3">Los Guardianes de la Chakana</p>
+    <h2 class="font-cinzelDec text-3xl sm:text-4xl text-gold-gradient mb-4">Personajes</h2>
+    <div class="chakana-divider"></div>
+  </div>
+
+  <!-- Carousel -->
+  <div class="carousel-wrapper" role="region" aria-label="Carrusel de personajes"
+       id="char-carousel">
+
+    <!-- Prev / Next buttons -->
+    <button class="carousel-btn carousel-btn-prev" id="carousel-prev" aria-label="Personaje anterior">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M11 4l-5 5 5 5" stroke="#f0d080" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <button class="carousel-btn carousel-btn-next" id="carousel-next" aria-label="Siguiente personaje">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M7 4l5 5-5 5" stroke="#f0d080" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <div class="carousel-track" id="carousel-track">
+
+      <!-- ── CARD 1 : SAMI ── -->
+      <article class="char-card" aria-label="Personaje Sami">
+        <div class="char-card-inner">
+          <div class="char-bg" style="background-image: url('background 1.png');"></div>
+
+          <!-- Zona sprite: 60% superior -->
+          <div class="char-zone-sprite">
+            <img src="character main.png" alt="Sami, el protagonista" class="char-sprite" />
+          </div>
+
+          <!-- Zona texto: 40% inferior -->
+          <div class="char-zone-text">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-cinzel text-[11px] tracking-[0.15em] uppercase" style="color:rgba(212,160,23,0.6);">Kay Pacha · Protagonista</span>
+              <div class="h-px flex-1 bg-gold-500/30"></div>
+            </div>
+            <h3 class="font-cinzelDec text-3xl sm:text-4xl text-gold-gradient mb-0.5">SAMI</h3>
+            <p class="font-crimson italic text-amber-200/80 text-sm mb-1.5">El Elegido de la Pachamama</p>
+            <p class="font-crimson text-amber-100/65 text-sm leading-snug mb-2.5 line-clamp-2">
+              Hijo de la tierra, Sami porta en su sangre el recuerdo de la Chakana primordial.
+              Guiado por el Anciano, asciende los tres mundos para restaurar el orden cósmico.
+            </p>
+            <span class="power-tag text-[0.67rem]"><i class="ph-light ph-lightning" style="font-size:0.9rem;"></i> Proyección de Energía Espiritual — 3 fragmentos</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- ── CARD 2 : EL ANCIANO ── -->
+      <article class="char-card" aria-label="Personaje El Anciano">
+        <div class="char-card-inner">
+          <div class="char-bg" style="background-image: url('background_2.png');"></div>
+
+          <!-- Zona sprite: 60% superior -->
+          <div class="char-zone-sprite">
+            <img src="oldperson.png" alt="El Anciano, guardián del saber" class="char-sprite"
+                 style="filter: drop-shadow(0 0 40px rgba(100,60,200,0.5)) drop-shadow(0 0 80px rgba(100,60,200,0.25));" />
+          </div>
+
+          <!-- Zona texto: 40% inferior -->
+          <div class="char-zone-text">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-cinzel text-[11px] tracking-[0.15em] uppercase" style="color:rgba(196,181,253,0.6);">Uku Pacha · Guía</span>
+              <div class="h-px flex-1 bg-purple-500/30"></div>
+            </div>
+            <h3 class="font-cinzelDec text-3xl sm:text-4xl mb-0.5"
+                style="background: linear-gradient(135deg,#c4b5fd,#8b5cf6,#c4b5fd); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">
+              EL ANCIANO
+            </h3>
+            <p class="font-crimson italic text-purple-200/80 text-sm mb-1.5">El Guardián del Saber</p>
+            <p class="font-crimson text-amber-100/65 text-sm leading-snug mb-2.5 line-clamp-2">
+              Memoria viva de los Andes, habita las profundidades del Uku Pacha desde tiempos inmemoriales.
+              Su voz es el hilo que conecta a Sami con la sabiduría de los ancestros.
+            </p>
+            <span class="power-tag text-[0.67rem]" style="background:rgba(139,92,246,0.1); border-color:rgba(139,92,246,0.4); color:#c4b5fd;">
+              <i class="ph-light ph-book-open" style="font-size:0.9rem;"></i> Conocimiento Ancestral · Guía en el inframundo
+            </span>
+          </div>
+        </div>
+      </article>
+
+      <!-- ── CARD 3 : LA ENTIDAD ── -->
+      <article class="char-card" aria-label="Personaje La Entidad">
+        <div class="char-card-inner">
+          <div class="char-bg" style="background-image: url('backgroundSky.png'); filter: hue-rotate(180deg) brightness(0.35);"></div>
+
+          <!-- Zona sprite: 60% superior -->
+          <div class="char-zone-sprite" style="background: radial-gradient(ellipse at center 30%, rgba(120,0,0,0.22) 0%, transparent 70%);">
+            <img src="la entidad.png" alt="La Entidad, el enemigo final" class="char-sprite"
+                 style="filter: drop-shadow(0 0 50px rgba(220,38,38,0.6)) drop-shadow(0 0 20px rgba(220,38,38,0.35));" />
+          </div>
+
+          <!-- Zona texto: 40% inferior -->
+          <div class="char-zone-text">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-cinzel text-[11px] tracking-[0.15em] uppercase" style="color:rgba(248,113,113,0.6);">Hanan Pacha · Antagonista</span>
+              <div class="h-px flex-1 bg-red-700/30"></div>
+            </div>
+            <h3 class="font-cinzelDec text-3xl sm:text-4xl mb-0.5"
+                style="background: linear-gradient(135deg,#fca5a5,#ef4444,#b91c1c); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">
+              LA ENTIDAD
+            </h3>
+            <p class="font-crimson italic text-red-300/80 text-sm mb-1.5">La Sombra del Desequilibrio</p>
+            <p class="font-crimson text-amber-100/65 text-sm leading-snug mb-2.5 line-clamp-2">
+              Encarna el caos nacido de la ruptura entre el sol y la luna.
+              Jefe final en Hanan Pacha: derrotada respondiendo acertijos sobre cosmovisión andina.
+            </p>
+            <span class="power-tag text-[0.67rem]" style="background:rgba(239,68,68,0.08); border-color:rgba(239,68,68,0.35); color:#fca5a5;">
+              <i class="ph-light ph-timer" style="font-size:0.9rem;"></i> Acertijos en 20 segundos · Jefe final del Hanan Pacha
+            </span>
+          </div>
+        </div>
+      </article>
+
+    </div><!-- /carousel-track -->
+  </div><!-- /carousel-wrapper -->
+
+  <!-- Dots -->
+  <div class="carousel-dots flex justify-center gap-2 py-6" id="carousel-dots" role="tablist" aria-label="Navegación del carrusel">
+    <button class="active" role="tab" aria-selected="true" aria-label="Sami"></button>
+    <button role="tab" aria-selected="false" aria-label="El Anciano"></button>
+    <button role="tab" aria-selected="false" aria-label="La Entidad"></button>
+  </div>
+
+  <!-- Character names row (desktop quick nav) -->
+  <div class="hidden md:flex justify-center gap-8 pb-12 px-5" id="char-tabs">
+    <button data-idx="0"
+            class="char-tab font-cinzel text-xs tracking-widest uppercase text-gold-400 border-b border-gold-500 pb-1 transition-opacity">
+      Sami
+    </button>
+    <button data-idx="1"
+            class="char-tab font-cinzel text-xs tracking-widest uppercase text-amber-100/40 border-b border-transparent pb-1 transition-opacity hover:text-amber-100/70">
+      El Anciano
+    </button>
+    <button data-idx="2"
+            class="char-tab font-cinzel text-xs tracking-widest uppercase text-amber-100/40 border-b border-transparent pb-1 transition-opacity hover:text-amber-100/70">
+      La Entidad
+    </button>
+  </div>
+
+</section>
+
+
+<!-- ════════════════════════════════════════
+     CHALLENGES / PUZZLES
+════════════════════════════════════════ -->
+<section id="challenges" aria-label="Desafíos y puzzles del juego">
+
+  <!-- Decorative top border -->
+  <div class="h-px w-full" style="background: linear-gradient(90deg, transparent, rgba(212,160,23,0.4), transparent);"></div>
+
+  <div class="max-w-5xl mx-auto px-5 py-20">
+
+    <!-- Header -->
+    <div class="text-center mb-14 section-reveal">
+      <p class="font-cinzel text-gold-500 text-xs tracking-[0.25em] uppercase mb-3">El Camino de la Lógica</p>
+      <h2 class="font-cinzelDec text-3xl sm:text-4xl text-gold-gradient mb-4">Desafíos</h2>
+      <div class="chakana-divider mb-5"></div>
+      <p class="font-crimson text-amber-100/70 text-lg max-w-xl mx-auto leading-relaxed">
+        Cada mundo oculta una prueba que combina la sabiduría ancestral andina
+        con retos de lógica y razonamiento. ¿Estás listo para enfrentarlos?
+      </p>
+    </div>
+
+    <!-- Cards grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <!-- Challenge 1 -->
+      <div class="challenge-card p-6 sm:p-7" id="ch-card-0">
+        <div class="challenge-icon mb-4"><i class="ph-light ph-scales" style="color:#d4a017;"></i></div>
+        <div class="flex items-center gap-2 mb-3">
+          <span class="tech-badge text-[0.6rem]">Kay Pacha</span>
+        </div>
+        <h3 class="font-cinzel text-gold-300 text-lg leading-snug mb-3">
+          La Balanza del Equilibrio
+        </h3>
+        <div class="ornament-line mb-4" style="margin:0 0 1rem 0; width:60px;"></div>
+        <p class="font-crimson text-amber-100/65 text-base leading-relaxed">
+          En el mundo terrenal, las puertas se abren solo cuando el peso
+          se distribuye con justicia. Usa la lógica de contrapesos para
+          desbloquear el paso y continuar tu ascenso.
+        </p>
+        <div class="mt-5 flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full bg-green-400/70"></div>
+          <span class="challenge-tag-text font-cinzel text-green-400/70 text-[0.65rem] tracking-[0.1em] uppercase">Lógica · Contrapesos</span>
+        </div>
+      </div>
+
+      <!-- Challenge 2 -->
+      <div class="challenge-card p-6 sm:p-7" id="ch-card-1">
+        <div class="challenge-icon mb-4"><i class="ph-light ph-yin-yang" style="color:#d4a017;"></i></div>
+        <div class="flex items-center gap-2 mb-3">
+          <span class="tech-badge text-[0.6rem]">Hanan Pacha</span>
+        </div>
+        <h3 class="font-cinzel text-gold-300 text-lg leading-snug mb-3">
+          Dualidad y Armonía — Yanantin
+        </h3>
+        <div class="ornament-line mb-4" style="margin:0 0 1rem 0; width:60px;"></div>
+        <p class="font-crimson text-amber-100/65 text-base leading-relaxed">
+          El concepto andino <em>Yanantin</em> enseña que los opuestos se complementan.
+          Empuja las cajas del Sol y la Luna a sus altares para restaurar
+          la dualidad sagrada del cielo.
+        </p>
+        <div class="mt-5 flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full bg-yellow-400/70"></div>
+          <span class="challenge-tag-text font-cinzel text-yellow-400/70 text-[0.65rem] tracking-[0.1em] uppercase">Yanantin · Dualidad</span>
+        </div>
+      </div>
+
+      <!-- Challenge 3 -->
+      <div class="challenge-card p-6 sm:p-7" id="ch-card-2">
+        <div class="challenge-icon mb-4"><i class="ph-light ph-drop" style="color:#60a5fa;"></i></div>
+        <div class="flex items-center gap-2 mb-3">
+          <span class="tech-badge text-[0.6rem]">Uku Pacha</span>
+        </div>
+        <h3 class="font-cinzel text-gold-300 text-lg leading-snug mb-3">
+          Reciprocidad Hídrica — Ayni
+        </h3>
+        <div class="ornament-line mb-4" style="margin:0 0 1rem 0; width:60px;"></div>
+        <p class="font-crimson text-amber-100/65 text-base leading-relaxed">
+          El <em>Ayni</em> es el principio de dar y recibir. Manipula las palancas
+          de las profundidades para redirigir el agua hacia donde la tierra
+          la necesita, y abre el camino al siguiente mundo.
+        </p>
+        <div class="mt-5 flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full bg-blue-400/70"></div>
+          <span class="challenge-tag-text font-cinzel text-blue-400/70 text-[0.65rem] tracking-[0.1em] uppercase">Ayni · Reciprocidad</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Decorative bottom border -->
+  <div class="h-px w-full" style="background: linear-gradient(90deg, transparent, rgba(212,160,23,0.4), transparent);"></div>
+
+</section>
+
+
+<!-- ════════════════════════════════════════
+     FOOTER TÉCNICO
+════════════════════════════════════════ -->
+<footer id="footer-tech" class="px-5 pt-20 pb-10">
+  <div class="max-w-4xl mx-auto">
+
+    <!-- Header -->
+    <div class="text-center mb-14 section-reveal">
+      <p class="font-cinzel text-gold-500 text-xs tracking-[0.25em] uppercase mb-3">Hecho con pasión andina</p>
+      <h2 class="font-cinzelDec text-3xl sm:text-4xl text-gold-gradient mb-4">Tecnología e IHM</h2>
+      <div class="chakana-divider"></div>
+    </div>
+
+    <!-- Engine + features row -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-14 section-reveal">
+
+      <!-- Engine -->
+      <div class="text-center sm:text-left">
+        <p class="font-cinzel text-gold-400 text-xs tracking-[0.2em] uppercase mb-4">Motor de Juego</p>
+        <div class="flex items-center gap-3 justify-center sm:justify-start mb-3">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+               style="background: linear-gradient(135deg, rgba(212,160,23,0.2), rgba(212,160,23,0.05)); border: 1px solid rgba(212,160,23,0.35);">
+            <i class="ph-light ph-game-controller" style="font-size:1.5rem; color:#d4a017;"></i>
+          </div>
+          <div>
+            <p class="font-cinzel text-gold-300 text-base">Godot Engine 4</p>
+            <p class="font-crimson text-amber-100/50 text-sm">Open Source · GDScript</p>
+          </div>
+        </div>
+        <p class="font-crimson text-amber-100/60 text-base leading-relaxed">
+          Plataformas: PC (Windows/Linux) y navegador web vía exportación HTML5.
+          Arquitectura modular con escenas anidadas por mundo.
+        </p>
+      </div>
+
+      <!-- Accessibility features -->
+      <div class="text-center sm:text-left">
+        <p class="font-cinzel text-gold-400 text-xs tracking-[0.2em] uppercase mb-4">Accesibilidad & UX</p>
+        <ul class="space-y-3 font-crimson text-base text-amber-100/70">
+          <li class="flex items-start gap-2">
+            <span class="text-gold-400 mt-0.5"><i class="ph-light ph-keyboard"></i></span>
+            <span>Navegación 100% por teclado — sin dependencia del mouse</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-gold-400 mt-0.5"><i class="ph-light ph-speaker-high"></i></span>
+            <span>Text-To-Speech dinámico para todos los diálogos e instrucciones</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-gold-400 mt-0.5"><i class="ph-light ph-sparkle"></i></span>
+            <span>Screen Shake + destellos visuales en eventos críticos</span>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Divider -->
+    <div class="ornament-line mb-12"></div>
+
+    <!-- Credits -->
+    <div class="text-center section-reveal">
+      <p class="font-cinzel text-gold-500 text-xs tracking-[0.25em] uppercase mb-8">Equipo Creativo</p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-16 mb-8">
+
+        <!-- Lead developer -->
+        <div class="text-center">
+          <div class="w-20 h-20 mx-auto mb-3 rounded-full flex items-center justify-center"
+               style="background: linear-gradient(135deg, rgba(212,160,23,0.2), rgba(212,160,23,0.05)); border: 1px solid rgba(212,160,23,0.4);">
+            <i class="ph-light ph-code" style="font-size:2rem; color:#d4a017;"></i>
+          </div>
+          <p class="font-cinzelDec text-gold-300 text-base mb-1">Marlon Loor Medranda</p>
+          <p class="font-cinzel text-gold-400 text-[0.65rem] tracking-widest uppercase mb-1">Creador Principal</p>
+          <p class="font-crimson text-amber-200/60 text-sm">Ingeniería de Software</p>
+        </div>
+
+        <!-- Divider vertical -->
+        <div class="hidden sm:block w-px h-20 bg-gold-700/40"></div>
+        <div class="sm:hidden ornament-line w-24"></div>
+
+        <!-- Co-producer -->
+        <div class="text-center">
+          <div class="w-20 h-20 mx-auto mb-3 rounded-full flex items-center justify-center"
+               style="background: linear-gradient(135deg, rgba(212,160,23,0.15), rgba(212,160,23,0.03)); border: 1px solid rgba(212,160,23,0.3);">
+            <i class="ph-light ph-film-strip" style="font-size:2rem; color:#d4a017;"></i>
+          </div>
+          <p class="font-cinzelDec text-gold-300 text-base mb-1">Eduardo Reinoso</p>
+          <p class="font-cinzel text-gold-400 text-[0.65rem] tracking-widest uppercase mb-1">Co-Producer</p>
+          <p class="font-crimson text-amber-200/60 text-sm">Producción & Diseño</p>
+        </div>
+
+      </div>
+
+      <!-- Event badge -->
+      <div class="inline-flex items-center gap-3 px-6 py-3 rounded-full mb-8"
+           style="background: rgba(212,160,23,0.08); border: 1px solid rgba(212,160,23,0.25);">
+        <img src="chakana_infiel1.png" alt="" class="h-6 w-6 object-contain opacity-70" aria-hidden="true" />
+        <span class="font-cinzel text-gold-400/80 text-xs tracking-widest">Feria de Saberes Ancestrales</span>
+      </div>
+
+      <!-- Tagline bottom -->
+      <p class="font-cinzel text-gold-600/50 text-[0.6rem] tracking-[0.2em] uppercase">
+        CHAKANA &nbsp;·&nbsp; 2025 &nbsp;·&nbsp; Todos los mundos en equilibrio
+      </p>
+
+    </div>
+
+  </div>
+</footer>
+
+
+<!-- ════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  /* ── Register GSAP plugins ── */
+  gsap.registerPlugin(ScrollTrigger);
+
+  /* ══════════════════════════════
+     PARTICLES (floating stars)
+  ══════════════════════════════ */
+  const canvas = document.getElementById('particles-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function createParticles(n) {
+    particles = [];
+    for (let i = 0; i < n; i++) {
+      particles.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() * 1.6 + 0.3,
+        speed: Math.random() * 0.25 + 0.05,
+        opacity: Math.random() * 0.6 + 0.2,
+        twinkleSpeed: Math.random() * 0.02 + 0.005,
+        twinklePhase: Math.random() * Math.PI * 2,
+        // gold-tinted or white
+        color: Math.random() < 0.25 ? 'rgba(212,160,23,' : 'rgba(255,255,255,',
+      });
+    }
+  }
+
+  let frame = 0;
+  function animateParticles() {
+    requestAnimationFrame(animateParticles);
+    ctx.clearRect(0, 0, W, H);
+    frame++;
+
+    for (const p of particles) {
+      p.twinklePhase += p.twinkleSpeed;
+      const alpha = p.opacity * (0.5 + 0.5 * Math.sin(p.twinklePhase));
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color + alpha + ')';
+      ctx.fill();
+
+      p.y -= p.speed;
+      if (p.y < -5) { p.y = H + 5; p.x = Math.random() * W; }
+    }
+  }
+
+  resize();
+  createParticles(120);
+  animateParticles();
+  window.addEventListener('resize', () => { resize(); createParticles(120); });
+
+
+  /* ══════════════════════════════
+     HERO ENTRANCE ANIMATION
+  ══════════════════════════════ */
+  const heroTl = gsap.timeline({ delay: 0.2 });
+
+  heroTl
+    .to('#hero-logo', {
+      opacity: 1,
+      scale: 1,
+      duration: 1.1,
+      ease: 'back.out(1.6)',
+    })
+    .to('#hero-tagline', {
+      opacity: 1,
+      y: 0,
+      duration: 0.9,
+      ease: 'power3.out',
+    }, '-=0.4');
+
+
+  /* ══════════════════════════════
+     NAVBAR SCROLL BEHAVIOR
+  ══════════════════════════════ */
+  const nav = document.getElementById('world-nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+  }, { passive: true });
+
+
+  /* ══════════════════════════════
+     SECTION REVEALS (ScrollTrigger)
+  ══════════════════════════════ */
+  gsap.utils.toArray('.section-reveal').forEach(el => {
+    gsap.to(el, {
+      opacity: 1,
+      y: 0,
+      duration: 0.9,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: el,
+        start: 'top 85%',
+        toggleActions: 'play none none none',
+      }
+    });
+  });
+
+
+  /* ══════════════════════════════
+     CHALLENGE CARDS STAGGER
+  ══════════════════════════════ */
+  gsap.to(['#ch-card-0', '#ch-card-1', '#ch-card-2'], {
+    opacity: 1,
+    y: 0,
+    duration: 0.75,
+    stagger: 0.18,
+    ease: 'power3.out',
+    scrollTrigger: {
+      trigger: '#challenges',
+      start: 'top 70%',
+      toggleActions: 'play none none none',
+    }
+  });
+
+
+  /* ══════════════════════════════
+     CAROUSEL
+  ══════════════════════════════ */
+  const track   = document.getElementById('carousel-track');
+  const dotsEl  = document.getElementById('carousel-dots');
+  const dots    = dotsEl.querySelectorAll('button');
+  const tabs    = document.querySelectorAll('.char-tab');
+  const total   = 3;
+  let current   = 0;
+  let startX    = 0;
+  let isDragging = false;
+  let dragDelta  = 0;
+
+  function goTo(idx, animated = true) {
+    current = (idx + total) % total;
+
+    const offset = -current * 100;
+    if (animated) {
+      gsap.to(track, {
+        x: offset + '%',
+        duration: 0.55,
+        ease: 'power2.inOut',
+      });
+    } else {
+      gsap.set(track, { x: offset + '%' });
+    }
+
+    dots.forEach((d, i) => {
+      d.classList.toggle('active', i === current);
+      d.setAttribute('aria-selected', i === current ? 'true' : 'false');
+    });
+
+    tabs.forEach((t, i) => {
+      if (i === current) {
+        t.classList.remove('text-amber-100/40', 'border-transparent');
+        t.classList.add('text-gold-400', 'border-gold-500');
+      } else {
+        t.classList.add('text-amber-100/40', 'border-transparent');
+        t.classList.remove('text-gold-400', 'border-gold-500');
+      }
+    });
+  }
+
+  // Buttons
+  document.getElementById('carousel-prev').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('carousel-next').addEventListener('click', () => goTo(current + 1));
+
+  // Dots
+  dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
+
+  // Desktop tabs
+  tabs.forEach(t => t.addEventListener('click', () => goTo(parseInt(t.dataset.idx, 10))));
+
+  // Touch / mouse swipe
+  const carousel = document.getElementById('char-carousel');
+
+  function onPointerDown(e) {
+    isDragging = true;
+    startX = (e.touches ? e.touches[0].clientX : e.clientX);
+    dragDelta = 0;
+    track.style.transition = 'none';
+  }
+
+  function onPointerMove(e) {
+    if (!isDragging) return;
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    dragDelta = x - startX;
+    const base = -current * 100;
+    const pct  = (dragDelta / window.innerWidth) * 100;
+    gsap.set(track, { x: (base + pct) + '%' });
+  }
+
+  function onPointerUp() {
+    if (!isDragging) return;
+    isDragging = false;
+    track.style.transition = '';
+
+    const threshold = window.innerWidth * 0.15;
+    if (dragDelta < -threshold) goTo(current + 1);
+    else if (dragDelta > threshold) goTo(current - 1);
+    else goTo(current);
+  }
+
+  carousel.addEventListener('touchstart',  onPointerDown, { passive: true });
+  carousel.addEventListener('touchmove',   onPointerMove, { passive: true });
+  carousel.addEventListener('touchend',    onPointerUp);
+  carousel.addEventListener('mousedown',   onPointerDown);
+  carousel.addEventListener('mousemove',   onPointerMove);
+  carousel.addEventListener('mouseup',     onPointerUp);
+  carousel.addEventListener('mouseleave',  onPointerUp);
+
+  // Keyboard nav for carousel
+  carousel.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') goTo(current + 1);
+    if (e.key === 'ArrowLeft')  goTo(current - 1);
+  });
+
+  // Auto-advance (pauses on interaction)
+  let autoTimer = setInterval(() => goTo(current + 1), 6000);
+  function resetAuto() {
+    clearInterval(autoTimer);
+    autoTimer = setInterval(() => goTo(current + 1), 6000);
+  }
+  ['touchstart','mousedown'].forEach(ev =>
+    carousel.addEventListener(ev, resetAuto, { passive: true })
+  );
+
+
+  /* ══════════════════════════════
+     PARALLAX HERO (mouse / gyro)
+  ══════════════════════════════ */
+  const heroRunes = document.querySelectorAll('.hero-rune');
+
+  window.addEventListener('mousemove', (e) => {
+    const cx = (e.clientX / window.innerWidth  - 0.5) * 2;
+    const cy = (e.clientY / window.innerHeight - 0.5) * 2;
+    heroRunes.forEach((r, i) => {
+      const factor = (i + 1) * 8;
+      gsap.to(r, { x: cx * factor, y: cy * factor, duration: 1.2, ease: 'power1.out' });
+    });
+  }, { passive: true });
+
+  // Device tilt (mobile)
+  if (window.DeviceOrientationEvent) {
+    window.addEventListener('deviceorientation', (e) => {
+      const cx = (e.gamma || 0) / 45;
+      const cy = (e.beta  || 0) / 45 - 0.5;
+      heroRunes.forEach((r, i) => {
+        const factor = (i + 1) * 6;
+        gsap.to(r, { x: cx * factor, y: cy * factor, duration: 1.5, ease: 'power1.out' });
+      });
+    }, { passive: true });
+  }
+
+})();
+</script>
+
+</body>
+</html>
