@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Move-Item -Path \"c:\\\\Users\\\\Lenovo.User\\\\Desktop\\\\EDUARDO\\\\chakana-web\\\\chakana-landing\\\\index.html\" -Destination \"c:\\\\Users\\\\Lenovo.User\\\\Desktop\\\\EDUARDO\\\\chakana-web\\\\index.html\")"
+    ]
+  }
+}
